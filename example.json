@@ -1,14 +1,14 @@
 {
   "type": "Matrix Multiplication",
   "frequency": 333.33333,
-  "row": 4,
-  "column": 4,
-  "inputX": 128,
-  "inputY": 128,
+  "row": 5,
+  "column": 6,
+  "inputX": 126,
+  "inputY": 120,
   "inputZ": 128,
-  "DSP": 640,
-  "BRAM": 169,
+  "DSP": 1200,
+  "BRAM": 227,
   "URAM": 0,
-  "LUT": 79802,
-  "register": 137770
+  "LUT": 137163,
+  "register": 234806
 }

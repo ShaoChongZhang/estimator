@@ -1,4 +1,19 @@
+Verbose level, the higher, the more accurate (not guaranteed)
+
 level 1: input size, PE count, frequency
+
+This level is only usable when internal architecture of the kernel is known,
+so it works for MM so far.
+It estimates the number of each element.
+
 level 2: LUTS, register, DSP, BRAM
-level 3: with prior knowledge
+
+This level can be used to estimate any kernel with the variables known.
+The parameters are tuned for MM so accuracy on other kenrel is not guranteed.
+Since element count can be estimated fairly accurately, 
+this level requires accurate element count as input to out-perform level 1.
+
+level 3: with advanced knowledge of the kernel
+
+More complex estimation
 

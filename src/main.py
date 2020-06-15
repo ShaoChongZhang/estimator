@@ -10,7 +10,7 @@ def main(verbose, argv):
     for file in argv:
         config = es.load_config(file)
         power = es.power(verbose, config)
-        print(power)
+        print("total: " + str(power))
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2:])
