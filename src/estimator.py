@@ -1,79 +1,155 @@
-class Estimator:
-    def __init__(self, configuration):
-        self.appType = configuration["type"]
-        if self.appType == "Matrix Multiplication":
-            self.estimate_MM(configuration)
+import json
+import math
+
+ClockEnable = 0.305858
+FanoutPerSite = 3.040281
+DSPToggle = 9.720727
+
+def power(config=None, filename=None):
+    if config == None:
+        if filename == None:
+            print("config needed")
+            exit(1)
         else:
-            print("App type " + self.appType + " not supported")
-            exit(0)
+            config = load_config(filename)
 
-    def estimate_MM(self, configuration):
-        self.verbose = int(configuration["verbose"])
-        assert self.verbose == 0 or self.verbose == 1 or self.verbose == 2
-        self.rowDim = int(configuration["row"])
-        self.columnDim = int(configuration["column"])
-        self.PE = self.columnDim * self.rowDim
-        self.inputRow = int(configuration["input row"])
-        self.inputColumn = int(configuration["input column"])
-        self.frequency = int(configuration["frequency"])
+    clock_power = clock(config)
+    logic_power = logic(config)
+    BRAM_power = BRAM(config)
+    DSP_power = DSP(config)
+    print(clock_power)
+    print(logic_power)
+    print(BRAM_power)
+    print(DSP_power)
+    print(clock_power + BRAM_power + DSP_power + logic_power)
+    return clock_power + BRAM_power + DSP_power + logic_power
 
-        if self.verbose == 0:
-            self.logic = 3998 * self.PE + 8221
-            self.shiftReg = 483 * self.PE + 260
-            self.reg = 7547 * self.PE + 17184
-            self.DSP = 40 * self.PE
-            self.BRAM = 3.125 * self.PE + 140
 
-        elif self.verbose == 1:
-            self.logic = 3998 * self.PE + 8221
-            self.shiftReg = 483 * self.PE + 260
-            self.reg = int(configuration["register"])
-            self.DSP = int(configuration["DSP"])
-            self.BRAM = int(configuration["BRAM"])
+def load_config(filename):
+    try:
+        with open(filename, "r") as f:
+            config = json.load(f)
+            config["PE"] = config["row"] * config["column"]
+
+    except:
+        print("file " + filename + " cannot be opened")
+        exit(1)
+    
+    if config["verbose"] < 1 or config["verbose"] > 3:
+        print("file " + filename + " illegal verbose level")
+        exit(1)
+    return config
+
+def clock(config=None, filename=None):
+    if config == None:
+        config = load_config(filename)
+    verbose = config["verbose"]
+
+    if config["type"] == "Matrix Multiplication":
+        if verbose == 1:
+            fanout = 18080.5 + config["PE"] * 8126.03
+            power = 0.000057768 * math.pow(fanout, 0.878646)
+        elif verbose == 2:
+            fanout = config["register"] + config["BRAM"] + config["DSP"]
+            power = 0.000057768 * math.pow(fanout, 0.878646)
         else:
-            self.logic = int(configuration["logic"])
-            self.shiftReg = int(configuration["shift register"])
-            self.reg = int(configuration["register"])
-            self.DSP = int(configuration["DSP"])
-            self.BRAM = int(configuration["BRAM"])
+            fanout = config["register"] + config["BRAM"] + config["DSP"]
+            if config["PE"] > 46:
+                power = 0.0000523458 * math.pow(fanout, 0.880098)
+            elif config["PE"] > 29:
+                power = 0.0000566314 * math.pow(fanout, 0.878934)
+            elif config["PE"] > 16:
+                power = 0.0000593269 * math.pow(fanout, 0.878313)
+            elif config["PE"] > 11:
+                power = 0.0000669245 * math.pow(fanout, 0.876658)
+            else:
+                power = 0.0000721758 * math.pow(fanout, 0.875768)
+    else:
+        if verbose == 1:
+            print("cannot estimate clock power without #register or prior knowledge")
+        else:
+            fanout = config["shift_register"] + config["register"] + config["BRAM"] + config["DSP"]
+            power = 0.0000577676 * math.pow(fanout, 0.878646)
 
-        self.clockPower = self.estimate_MM_clock()
+    return power * config["frequency"] / 333.33333
 
-        self.logicPower = self.estimate_MM_logic()
+def DSP(config=None, filename=None):
+    if config == None:
+        config = load_config(filename)
+    verbose = config["verbose"]
 
-        self.DSPPower = self.estimate_MM_DSP()
+    if config["type"] == "Matrix Multiplication":
+        if verbose == 1:
+            config["DSP"] = config["PE"] * 40
+            power = 1.1578 * config["DSP"] / 1000
+        elif verbose == 2:
+            power = 1.1578 * config["DSP"] / 1000
+        else:
+            DSP1 = 0.779 * config["DSP"] / 5000
+            DSP2 = 1.222 * config["DSP"] / 5000
+            DSP3 = 1.117 * config["DSP"] / 2500
+            DSP4 = 1.576 * config["DSP"] / 5000
+            power = DSP1 + DSP2 + DSP3 + DSP4
+    else:
+        if verbose == 1:
+            print("cannot estimate DSP power without #DSP or prior knowledge")
+        else:
+            power = 1.15783 * config["DSP"] / 1000
 
-        self.BRAMPower = self.estimate_MM_BRAM()
+    return power * config["frequency"] / 333.33333
 
-    
-    def estimate_MM_clock(self):
-        """
-        clock buffer enable rate: 100%
-        slice buffer enable rate: 30%
-        """
-        fanout = self.shiftReg + self.reg + self.DSP + 2 * self.BRAM
-        fanoutPerSite = -0.01381219949 * pow(self.PE, 1.5) + 0.207259816 * self.PE - 0.7502239272 * pow(self.PE, 0.5) + 3.189499138
-        coifficient = -0.000001033189099 * fanoutPerSite  + 0.00003178538474 / pow(fanoutPerSite, 2) + 0.00001112569767
-        return (self.frequency / 333.33333) * (coifficient * fanout + 0.245)
-    
-    def estimate_MM_logic(self):
-        """
-        based on #of each units
-        toggle rate and complexity are set to default
-        """
-        return 0
-    
-    def estimate_MM_DSP(self):
-        """
 
-        """
-        return 0
-    
-    def estimate_MM_BRAM(self):
-        """
-        """
-        return 0
+def logic(config=None, filename=None):
+    if config == None:
+        config = load_config(filename)
+    verbose = config["verbose"]
 
-    def printResult(self):
-        power = self.clockPower + self.logicPower + self.DSPPower + self.BRAMPower
-        print(power)
+    if config["type"] == "Matrix Multiplication":
+        if verbose == 1:
+            lut = 4298.17 * config["PE"] + 9191.8
+            reg = 7584.22 * config["PE"] + 17578.5
+            lut = 0.1221 * lut / 10000
+            reg = 0.0671 * reg / 10000
+            power = lut + reg
+        elif verbose == 2:
+            lut = 0.1221 * config["LUT"] / 10000
+            reg = 0.0671 * config["register"] / 10000
+            power = lut + reg
+        else:
+            lut1 = 0.1221 * 0.8909 * config["LUT"] / 10000
+            lut2 = 0.1859 * 0.0031 * config["LUT"] / 10000
+            lut3 = 1.6399 * 0.106 * config["LUT"] / 10000
+            reg1 = 0.0671 * 0.994 * config["register"] / 10000
+            reg2 = 1.6362 * 0.006 * config["register"] / 10000
+            
+            power = lut1 + lut2 + lut3 + reg1 + reg2
+    else:
+        if verbose == 1:
+            print("cannot estimate logic power without #logic or prior knowledge")
+        else:
+            lut = 0.1221 * config["LUT"] / 10000
+            reg = 0.0671 * config["register"] / 10000
+            power = lut + reg
+
+    return power * config["frequency"] / 333.33333
+
+def BRAM(config=None, filename=None):
+    if config == None:
+        config = load_config(filename)
+    verbose = config["verbose"]
+
+    if config["type"] == "Matrix Multiplication":
+        if verbose == 1:
+            power = 0.0069894 * config["PE"] + 0.549718
+        else:
+            power = 0.00294597 * config["BRAM"]
+    else:
+        if verbose == 1:
+            print("cannot estimate logic power without #logic or prior knowledge")
+        else:
+            power = 0.00294597 * config["BRAM"]
+
+    return power * config["frequency"] / 333.33333
+
+if __name__ == "__main__":
+    power(None, "example.json")

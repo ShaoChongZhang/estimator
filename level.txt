@@ -1,0 +1,4 @@
+level 1: input size, PE count, frequency
+level 2: LUTS, register, DSP, BRAM
+level 3: with prior knowledge
+
