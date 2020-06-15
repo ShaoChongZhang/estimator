@@ -1,6 +1,5 @@
 {
   "type": "Matrix Multiplication",
-  "verbose": 2,
   "frequency": 333.33333,
   "row": 4,
   "column": 4,

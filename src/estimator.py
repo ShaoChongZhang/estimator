@@ -5,7 +5,7 @@ ClockEnable = 0.305858
 FanoutPerSite = 3.040281
 DSPToggle = 9.720727
 
-def power(config=None, filename=None):
+def power(verbose, config=None, filename=None):
     if config == None:
         if filename == None:
             print("config needed")
@@ -13,10 +13,10 @@ def power(config=None, filename=None):
         else:
             config = load_config(filename)
 
-    clock_power = clock(config)
-    logic_power = logic(config)
-    BRAM_power = BRAM(config)
-    DSP_power = DSP(config)
+    clock_power = clock(verbose,config)
+    logic_power = logic(verbose, config)
+    BRAM_power = BRAM(verbose, config)
+    DSP_power = DSP(verbose, config)
     print(clock_power)
     print(logic_power)
     print(BRAM_power)
@@ -35,15 +35,11 @@ def load_config(filename):
         print("file " + filename + " cannot be opened")
         exit(1)
     
-    if config["verbose"] < 1 or config["verbose"] > 3:
-        print("file " + filename + " illegal verbose level")
-        exit(1)
     return config
 
-def clock(config=None, filename=None):
+def clock(verbose, config=None, filename=None):
     if config == None:
         config = load_config(filename)
-    verbose = config["verbose"]
 
     if config["type"] == "Matrix Multiplication":
         if verbose == 1:
@@ -73,10 +69,9 @@ def clock(config=None, filename=None):
 
     return power * config["frequency"] / 333.33333
 
-def DSP(config=None, filename=None):
+def DSP(verbose, config=None, filename=None):
     if config == None:
         config = load_config(filename)
-    verbose = config["verbose"]
 
     if config["type"] == "Matrix Multiplication":
         if verbose == 1:
@@ -99,10 +94,9 @@ def DSP(config=None, filename=None):
     return power * config["frequency"] / 333.33333
 
 
-def logic(config=None, filename=None):
+def logic(verbose, config=None, filename=None):
     if config == None:
         config = load_config(filename)
-    verbose = config["verbose"]
 
     if config["type"] == "Matrix Multiplication":
         if verbose == 1:
@@ -133,10 +127,9 @@ def logic(config=None, filename=None):
 
     return power * config["frequency"] / 333.33333
 
-def BRAM(config=None, filename=None):
+def BRAM(verbose, config=None, filename=None):
     if config == None:
         config = load_config(filename)
-    verbose = config["verbose"]
 
     if config["type"] == "Matrix Multiplication":
         if verbose == 1:
@@ -152,4 +145,4 @@ def BRAM(config=None, filename=None):
     return power * config["frequency"] / 333.33333
 
 if __name__ == "__main__":
-    power(None, "example.json")
+    power(2, None, "example.json")
