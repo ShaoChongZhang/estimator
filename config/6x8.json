@@ -1,0 +1,14 @@
+{
+  "type": "Matrix Multiplication",
+  "frequency": 333.33333,
+  "row": 6,
+  "column": 8,
+  "inputX": 128,
+  "inputY": 128,
+  "inputZ": 128,
+  "DSP": 1920,
+  "BRAM": 322,
+  "URAM": 0,
+  "LUT": 214516,
+  "register": 382062
+}

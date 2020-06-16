@@ -14,12 +14,8 @@ def power(verbose, config=None, filename=None):
     BRAM_power = BRAM(verbose, config)
     DSP_power = DSP(verbose, config)
     static_power = static(verbose, config)
-    print("clock: " + str(clock_power))
-    print("logic: " + str(logic_power))
-    print("BRAM: " + str(BRAM_power))
-    print("DSP: " + str(DSP_power))
-    print("static: " + str(static_power))
-    return round(clock_power + BRAM_power + DSP_power + logic_power + static_power, 3)
+    
+    return round(clock_power + BRAM_power + DSP_power + logic_power + static_power, 3), clock_power, logic_power, BRAM_power, DSP_power, static_power
 
 
 def load_config(filename):

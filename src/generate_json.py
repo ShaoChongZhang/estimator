@@ -4,7 +4,6 @@ import sys
 def main(argv):
     design = {}
     design["type"] = "Matrix Multiplication"
-    design["verbose"] = 2
     design["frequency"] = 333.33333
     design["row"] = 4
     design["column"] = 4
