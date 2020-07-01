@@ -22,7 +22,7 @@ def estimate(verbose, filelist):
         print("DSP: " + str(power[4]))
         print("static: " + str(power[5]))
 
-# estimate all the configurations in all 4 levels
+# estimate all the configurations in all 4 levels, the path is "config"
 def estimate_all(path):
     
     with open('result_train_0.csv', 'w', newline='') as train0, open('result_test0.csv', 'w', newline='') as test0, \
