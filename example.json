@@ -10,5 +10,6 @@
   "BRAM": 227,
   "URAM": 0,
   "LUT": 137163,
-  "register": 234806
+  "register": 234806,
+  "shift_register": 0
 }
