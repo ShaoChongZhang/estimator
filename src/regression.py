@@ -12,7 +12,7 @@ def regression(points, filename):
         # read the input file into a list
         for row in reader:
             csvfile.append([float(item) for item in row])
-    # check there are enough entries in the list for the regerssion
+    # check if there are enough entries in the list for the regerssion
     if len(csvfile) < points:
         print("cannot perform linear regression: too few data points")
         exit(0)
@@ -24,6 +24,7 @@ def regression(points, filename):
         regression_list = [0] * points
         recursive(points, 0, csvfile, writer, regression_list)
 
+# a n-level nested loop (n is the number of points), implemented in recursion
 def recursive(points, level, csvfile, writer, regression_list):
     # the first level of recursion
     if level == 0:
